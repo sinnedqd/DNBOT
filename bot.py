@@ -1,17 +1,13 @@
-from bs4 import BeautifulSoup
 from collections import OrderedDict
-from operator import itemgetter
-from riotwatcher import LolWatcher
 from dotenv import load_dotenv
+from riotwatcher import LolWatcher
+
 import discord
 import json
 import os
-import pytest
 import random
 import requests
 import time
-import warnings
-import wget
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -43,6 +39,10 @@ async def on_message(message):
     if value == 1:
         await message.channel.send("Shut up")
 
+    #TODO Help command
+    if message.content == '!help':
+        return
+
     if message.content == '!bryant':
         await message.channel.send("No I don't want to go out")
 
@@ -63,15 +63,16 @@ async def on_message(message):
     #using discord embed
     if message.content.startswith('!leaguestats'):
         message_string = message.content.split(" ")
-        base_stat = message_string[1]
-        data_list = get_champ_data_list()
-        sorted_list = OrderedDict()
-        for champ in data_list:
-            print(champ)
-            print(data_list[champ]['stats'])
-            sorted_list[champ] = data_list[champ]['stats'][base_stat]
-        sorted_list = sorted(sorted_list.items(), key = lambda x: int(x[1]), reverse=True)
-        await message.channel.send(sorted_list[0])
+        try:
+            base_stat = message_string[1]
+            data_list = get_champ_data_list()
+            sorted_list = OrderedDict()
+            for champ in data_list:
+                sorted_list[champ] = data_list[champ]['stats'][base_stat]
+            sorted_list = sorted(sorted_list.items(), key = lambda x: int(x[1]), reverse=True)
+            await message.channel.send(sorted_list[0])
+        except IndexError:
+            await message.channel.send("Uh oh! I need a stat to look up! Usage: '!leaguestats hp'")
 
 
 def get_champ_data_list():
