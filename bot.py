@@ -1,13 +1,13 @@
-from collections import OrderedDict
-from dotenv import load_dotenv
-from riotwatcher import LolWatcher
-
-import discord
 import json
 import os
 import random
-import requests
 import time
+from collections import OrderedDict
+
+import discord
+import requests
+from dotenv import load_dotenv
+from riotwatcher import LolWatcher
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
