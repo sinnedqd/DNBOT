@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 from collections import OrderedDict
 from operator import itemgetter
 from riotwatcher import LolWatcher
+from dotenv import load_dotenv
 import discord
 import json
 import os
@@ -12,9 +13,10 @@ import time
 import warnings
 import wget
 
-TOKEN = os.getenv("DISCORD_TOKEN")
-lol_watcher = LolWatcher(os.getenv("RIOT_TOKEN"))
-my_region = os.getenv("REGION")
+load_dotenv()
+TOKEN = os.getenv('DISCORD_TOKEN')
+lol_watcher = LolWatcher(os.getenv('RIOT_TOKEN'))
+my_region = os.getenv('REGION')
 
 client = discord.Client()
 
