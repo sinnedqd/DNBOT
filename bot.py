@@ -57,15 +57,48 @@ async def on_message(message):
         await message.channel.send(data[0]["death"])
 
     if message.content == '!cokeTime':
-        await message.channel.send(file=discord.File("/lib/cokeTime.gif"))
+        await message.channel.send(file=discord.File("lib/cokeTime.gif"))
+
+    if message.content == '!embedExample':
+        embed=discord.Embed(
+        title="Text Formatting",
+            url="https://realdrewdata.medium.com/",
+            description="Here are some ways to format text",
+            color=discord.Color.blue())
+        embed.set_author(name="RealDrewData", url="https://twitter.com/RealDrewData", icon_url="https://cdn-images-1.medium.com/fit/c/32/32/1*QVYjh50XJuOLQBeH_RZoGw.jpeg")
+        #embed.set_author(name=ctx.author.display_name, url="https://twitter.com/RealDrewData", icon_url=ctx.author.avatar_url)
+        embed.set_thumbnail(url="https://i.imgur.com/axLm3p6.jpeg")
+        embed.add_field(name="*Italics*", value="Surround your text in asterisks (\*)", inline=False)
+        embed.add_field(name="**Bold**", value="Surround your text in double asterisks (\*\*)", inline=False)
+        embed.add_field(name="__Underline__", value="Surround your text in double underscores (\_\_)", inline=False)
+        embed.add_field(name="~~Strikethrough~~", value="Surround your text in double tildes (\~\~)", inline=False)
+        embed.add_field(name="`Code Chunks`", value="Surround your text in backticks (\`)", inline=False)
+        embed.add_field(name="Blockquotes", value="> Start your text with a greater than symbol (\>)", inline=False)
+        embed.add_field(name="Secrets", value="||Surround your text with double pipes (\|\|)||", inline=False)
+        embed.set_footer(text="Learn more here: realdrewdata.medium.com")
+
+        await message.channel.send(embed=embed)
+
+    # Upon calling command send a Embed class that contains DaBaby
+    if message.content == '!daBaby':
+        file = discord.File("lib/daBaby.png", filename="daBaby.png")
+        embed = discord.Embed(
+            title="You have summoned DABABY",
+            decription="lets goooo",
+            color=discord.Color.blue()
+        )
+        embed.set_thumbnail(url="attachment://daBaby.png")
+        await message.channel.send(file=file, embed=embed)
 
     #TODO Send a picture of the league champion and then list all of the base stats in a message
     #using discord embed
     if message.content.startswith('!leaguestats'):
         message_string = message.content.split(" ")
         try:
+            print("MESSAGE_STRING[1]" + message_string[1])
             base_stat = message_string[1]
             data_list = get_champ_data_list()
+            print(data_list)
             sorted_list = OrderedDict()
             for champ in data_list:
                 sorted_list[champ] = data_list[champ]['stats'][base_stat]
