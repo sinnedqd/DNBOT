@@ -7,6 +7,7 @@ from collections import OrderedDict
 
 import discord
 import requests
+from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from riotwatcher import LolWatcher
 
@@ -101,17 +102,22 @@ async def on_message(message):
             print("MESSAGE_STRING[1]" + message_string[1])
             base_stat = message_string[1]
             data_list = get_champ_data_list()
-            print(data_list)
-            sorted_list = OrderedDict()
-            for champ in data_list:
-                await message.channel.send(base_stat)
-                await message.channel.send(" : ")
-                await message.channel.send(data_list[base_stat])
-                sorted_list[champ] = data_list[champ]['stats'][base_stat]
-            sorted_list = sorted(sorted_list.items(), key = lambda x: int(x[1]), reverse=True)
-            #await message.channel.send(sorted_list[champ])
+            champ = best_champ_for_stat(base_stat)
+            print(champ)
+            pic_of_champ = get_champ_portrait(champ)
+
+            descirption_message = "This is the strongest champion for the basestat: " + base_stat
+            embed_message = discord.Embed(
+                title = champ,
+                description=descirption_message,
+                color=discord.Color.blue()
+            )
+            embed.set_thumbnail(url=pic_of_champ)
+            embed.set_image(url=pic_of_champ)
+            await message.channel.send(embed=embed_message)
+
         except IndexError:
-            await message.channel.send("Uh oh! I need a stat to look up! Usage: '!leaguestats hp'")
+            await message.channel.send("Uh oh! I need a stat to look up! Example Usage: '!leaguestats hp'")
 
 
 def get_champ_data_list():
@@ -121,47 +127,33 @@ def get_champ_data_list():
     champion_data_list = OrderedDict(current_champ_list['data'])
     return champion_data_list
 
-def get_champ_portraits():
-    #coding:utf8    
-    cur_path = os.path.abspath(os.curdir)
-    
-    champion = "https://game.gtimg.cn/images/lol/act/img/js/heroList/hero_list.js"
-    championobj =  json.loads(requests.get(champion).text)
-    heroIds = championobj['hero']
-    # print(championobj)
-    # # print(jsonobj)
-    for c in heroIds:
-        print(c["heroId"])
-        url="https://game.gtimg.cn/images/lol/act/img/js/hero/"+str(c["heroId"])+".js"
-        # Send request, get response result
-        response = requests.get(url)
-        text = response.text
-    
-            # Print the response content of this request
-        # print(text)
-    
-    # Convert response content into Json object
-        jsonobj = json.loads(text)
-        # print(jsonobj)
-            #Get hero name as folder name
-        heroname =  jsonobj["hero"]["name"] 
-        print(heroname) 
-        isExists=os.path.exists(cur_path+'/all skin pictures/'+heroname)
-        skinpath =cur_path+'/all skin pictures/'+heroname
-        if not isExists:
-                    os.makedirs(cur_path+'/all skin pictures/'+heroname)
-        # print(heroname)
-            #Get all skins
-        heroskins = jsonobj["skins"]
-        # print(heroskins)
-        for s in heroskins:
-            skinname = str(s["name"]).replace('','-').replace('/','') #skin name
-            skinimage = str(s["mainImg"]) #Skin image path
-            if(len(skinimage)!=0): 
-                file_suffix = os.path.splitext(skinimage)[1]
-                filename = '{}{}{}{}'.format(skinpath,os.sep,skinname,file_suffix)
-                urllib.request.urlretrieve(skinimage,filename)
-            # print(skinimage)
+def best_champ_for_stat(base_stat):
+    try:
+        data_list = get_champ_data_list()
+        sorted_list = OrderedDict()
+        for champ in data_list:
+            print(data_list[champ]['stats'])
+            sorted_list[champ] = data_list[champ]['stats'][base_stat]
+        sorted_list = sorted(sorted_list.items(), key = lambda x: int(x[1]), reverse=True)
+        return sorted_list[0]
+    except KeyError:
+        return 1
+
+#use website crawling to grab the league of legends champion portraits!
+def get_champ_portrait(champion):
+    lol_website_url = "https://na.leagueoflegends.com"
+    request = lol_website_url + "/en-us/champions/"+champion #creates the request link
+    r = requests.get(request)
+    if r.ok: #if the response code is fine
+        bs = BeautifulSoup(r.text, 'html.parser') #parse the webpage
+        for line in bs.findAll('img'): #look at all the img tags
+            original_link = line
+            image_link = str(line).lower()
+            if "splash" in image_link and str(champion) in image_link and "_0" in image_link: #check to see if the link contains splash art of champion and is the base skin
+                return original_link['src'] #grab the link to download? now what do i want to do
+    else:
+        print("Failed grabbing {}".format(request))
+    return None
 
 def main():
     client.run(TOKEN)
