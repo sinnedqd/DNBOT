@@ -118,6 +118,26 @@ async def on_message(message):
 
         except IndexError:
             await message.channel.send("Uh oh! I need a stat to look up! Example Usage: '!leaguestats hp'")
+    
+    if message.content.startswith("!build"):
+        message_string = message.content.split(" ")
+        try:
+            print("The champ being queried: " + message_string[1])
+            champ = message_string[1]
+            build = get_pro_builds(champ)
+
+            pic_of_champ = get_champ_portrait(champ)     
+            descirption_message = "This is the most recent probuild for the champion: " + champ
+            embed = discord.Embed(
+                title = champ,
+                description = descirption_message,
+                color = discord.Color.blurple
+            )
+            embed.set_thumbnail(url=pic_of_champ)
+            embed.set_image(url=pic_of_champ)
+
+        except IndexError:
+            await message.channel.send("Uh oh! I need a stat to look up! Example Usage: '!build Aatrox'")
 
 
 def get_champ_data_list():
